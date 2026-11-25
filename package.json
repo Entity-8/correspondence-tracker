@@ -1,0 +1,37 @@
+{
+  "name": "correspondence-tracker",
+  "version": "1.1.0",
+  "description": "Arabic RTL correspondence tracking and executive follow-up system with role-based workflows, audit trail, Excel reporting, and Capacitor Android support.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node server.js",
+    "test": "node --test tests/*.test.js",
+    "convert:mssql": "python3 convert_mssql.py app.db mssql_migration.sql",
+    "build:android": "vite build --mode android && cap sync android",
+    "apk": "npm run build:android && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@libsql/client": "^0.18.0",
+    "@vercel/blob": "^2.9.0",
+    "bcryptjs": "^2.4.3",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.3.4"
+  }
+}

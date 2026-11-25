@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">منظومة المراسلات</string>
+    <string name="title_activity_main">منظومة المراسلات</string>
+    <string name="package_name">iq.politicalbureau.correspondence</string>
+    <string name="custom_url_scheme">iq.politicalbureau.correspondence</string>
+</resources>

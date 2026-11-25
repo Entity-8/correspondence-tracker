@@ -1,0 +1,14 @@
+node_modules
+.git
+.env
+.env.*
+!.env.example
+app.db*
+uploads
+certs
+android
+*.apk
+*.log
+tests
+.github
+

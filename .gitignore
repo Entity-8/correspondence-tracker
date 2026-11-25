@@ -1,0 +1,34 @@
+# Dependencies & build output
+node_modules/
+dist/
+
+# Runtime database, uploads, logs
+app.db
+app.db-shm
+app.db-wal
+app.db-journal
+uploads/
+*.log
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+!.env.android.example
+certs/
+*.key
+*.crt
+*.pem
+
+# Android build & local artifacts
+*.apk
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/src/main/assets/public/
+
+# Local / generator metadata
+.khoarzmi*
+mssql_migration.sql
+.DS_Store
