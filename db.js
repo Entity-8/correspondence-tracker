@@ -177,6 +177,7 @@ export function createDatabase(dbPath = process.env.DB_PATH || 'app.db', options
   let transaction;
   let close;
   let readyPromise = null;
+  let initFn = null;
 
   if (tursoUrl) {
     const client = createClient({
@@ -223,14 +224,19 @@ export function createDatabase(dbPath = process.env.DB_PATH || 'app.db', options
 
     close = () => client.close();
 
-    readyPromise = (async () => {
+    initFn = async () => {
       await client.execute('PRAGMA foreign_keys = ON');
       await client.batch(
         SCHEMA_STATEMENTS.map(sql => ({ sql, args: [] })),
         'write',
       );
       await seedDatabase(q, transaction, options);
-    })();
+    };
+
+    readyPromise = initFn().catch(err => {
+      readyPromise = null;
+      throw err;
+    });
   } else {
     if (dbPath !== ':memory:') {
       fs.mkdirSync(path.dirname(path.resolve(dbPath)), { recursive: true });
@@ -280,7 +286,15 @@ export function createDatabase(dbPath = process.env.DB_PATH || 'app.db', options
   return {
     q,
     transaction,
-    ensureReady: () => readyPromise,
+    ensureReady: () => {
+      if (!readyPromise && initFn) {
+        readyPromise = initFn().catch(err => {
+          readyPromise = null;
+          throw err;
+        });
+      }
+      return readyPromise;
+    },
     close: async () => {
       await readyPromise?.catch(() => {});
       close();
@@ -300,7 +314,7 @@ async function seedDatabase(q, transaction, options = {}) {
     await transaction(async tx => {
       for (let i = 0; i < DEPARTMENT_NAMES.length; i++) {
         await tx.run(
-          'INSERT INTO departments(id,name,role,is_head_office) VALUES(?,?,?,?)',
+          'INSERT OR IGNORE INTO departments(id,name,role,is_head_office) VALUES(?,?,?,?)',
           i + 1,
           DEPARTMENT_NAMES[i],
           i < 4 ? 'Supervisor' : i === 4 ? 'Registrar' : 'Unit',
@@ -332,7 +346,7 @@ async function seedDatabase(q, transaction, options = {}) {
       await transaction(async tx => {
         for (const [u, p, n, d, r] of accounts) {
           await tx.run(
-            'INSERT INTO users(username,password_hash,display_name,department_id,role,created_at,updated_at) VALUES(?,?,?,?,?,?,?)',
+            'INSERT OR IGNORE INTO users(username,password_hash,display_name,department_id,role,created_at,updated_at) VALUES(?,?,?,?,?,?,?)',
             u,
             bcrypt.hashSync(p, 10),
             n,
@@ -347,7 +361,7 @@ async function seedDatabase(q, transaction, options = {}) {
       const initialPassword =
         process.env.ADMIN_INITIAL_PASSWORD || crypto.randomBytes(12).toString('base64url');
       await q.run(
-        'INSERT INTO users(username,password_hash,display_name,department_id,role,created_at,updated_at) VALUES(?,?,?,?,?,?,?)',
+        'INSERT OR IGNORE INTO users(username,password_hash,display_name,department_id,role,created_at,updated_at) VALUES(?,?,?,?,?,?,?)',
         'admin',
         bcrypt.hashSync(initialPassword, 10),
         'مدير النظام',
